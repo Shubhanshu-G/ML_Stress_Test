@@ -1,0 +1,43 @@
+primary_split: grouped
+sweep_splits: [grouped, ood]          # splits that get the full sweeps
+baseline_only_splits: [random_iid]    # run unperturbed only, leakage comparison
+
+dataset:
+  name: UCI Superconductivty Data
+  uci_id: 464
+  source_file: data/train.csv
+  groups_file: data/unique_m.csv      # column "material" used for grouped split
+  sha256_train: 4dfb6e3a1f6ffd969e5a5e42f093c4800d1e2a6c8b1e309f8fcd9f23d86952f3
+  sha256_unique_m: b68ae6b55ea8581eff8b1ffba073a899db7e2d2f7f3b781bb0802f643f51e5f7
+  download_date: 2026-09-30
+  target: critical_temp
+
+split:
+  random_iid:                         # baseline only, leakage comparison
+    test_size: 0.2
+    split_seed: 0
+  grouped:                            # primary in-distribution split, by material
+    test_size: 0.2
+    split_seed: 0
+  ood:
+    quantile: 0.8                     # Tc threshold = 74.0, test = Tc above it
+
+model:
+  type: RandomForestRegressor
+  params:                             # fixed, never tuned. random_state is set per seed in code
+    n_estimators: 200
+    n_jobs: -1
+
+seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+primary_metric: rmse
+secondary_metrics: [mae, r2]
+
+sweeps:
+  train_fraction: [0.02, 0.05, 0.1, 0.25, 0.5, 1.0]
+  label_noise: [0, 0.05, 0.1, 0.2, 0.4]   # std as fraction of std(y_train), train only, test labels stay clean
+  input_noise: [0, 0.05, 0.1, 0.2, 0.4]   # std on standardized features, train only
+  missing_frac: [0, 0.1, 0.25, 0.5]       # cells masked in train AND test, filled with train means
+  interaction:
+    train_fraction: [0.1, 0.5, 1.0]
+    label_noise: [0, 0.2, 0.4]
