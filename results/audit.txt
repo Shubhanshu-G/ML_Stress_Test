@@ -1,0 +1,39 @@
+rows=21263  formulas=15542  rows in repeated formulas=7982 (37.5%)
+pooled within-formula std (repeated formulas only): 6.85 K
+median Tc range inside a repeated formula: 2.5 K; share with range > 10 K: 24.1%
+
+repeated formulas with the widest Tc range:
+                  count  tc_min  tc_max  range
+material                                      
+H2S1                  2    60.0   185.0  125.0
+Tl2Ba2Cu1O6          45    10.0   117.0  107.0
+Y1Ba2Cu3O7          110    30.3   130.0   99.7
+Bi2Sr2Ca1Cu2O        44    14.6    97.0   82.4
+Tl1Ba2Cu1O5           2    15.0    95.0   80.0
+Y1Ba2Cu3O6            5    13.7    91.1   77.4
+Bi2Sr2Ca1Cu2O8       80    25.0    99.0   74.0
+Y1Ba1.5Sr0.5Cu3O      4    11.0    84.0   73.0
+
+most repeated predictions on the grouped test set:
+        rows  materials  tc_min  tc_max
+y_pred                                 
+28.47     45          1   10.00   117.0
+92.03     44          1   42.00    97.0
+30.57     24          1   18.00    34.1
+38.18     23          2    0.37    32.0
+83.74     20          1   64.00    93.9
+
+materials among the 25 worst grouped errors:
+material
+Tl2Ba2Cu1O6                     15
+Hg1Ba2Cu1FO4                     2
+Bi2Sr2Ca2O                       1
+Tl2Ba2Cu1O                       1
+Tl1.15Sr1.6Ba0.4Ca2Cu3Ag0.4O     1
+Y1Ba2Cu3O6.19                    1
+Bi2Sr2Ca1Cu2O10                  1
+Hg1Ba2Cu1O4.1                    1
+
+Cu+O compounds: 37.0% of OOD train rows, 99.7% of OOD test rows
+OOD test, Cu+O=False: rows=12 bias=-73.5 rmse=82.3
+OOD test, Cu+O=True: rows=4237 bias=-34.3 rmse=39.0

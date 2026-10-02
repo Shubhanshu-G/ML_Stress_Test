@@ -1,0 +1,27 @@
+grouped baseline, seed 0: rows=4165  RMSE=10.47 K
+
+formulas contributing most of the squared error:
+                    rows  pct_sq_error  tc_min  tc_max  mean_true  mean_pred
+material                                                                    
+Tl2Ba2Cu1O6           45          16.7    10.0   117.0       58.9       28.5
+C1                    22           5.3     0.4    32.0        5.8       38.2
+Hg1Ba2Cu1FO4           5           2.7    78.0    97.0       89.8       40.4
+Y1Ba2Cu3O             44           2.1    42.0    97.0       84.8       92.0
+Bi2Sr2Ca2O             1           1.9   109.0   109.0      109.0       15.2
+Tl2Ba2Cu1O             1           1.1    10.0    10.0       10.0       79.5
+Pr0.5Ca0.5Ba2Cu3O7     5           0.9    37.0   105.0       66.6       61.6
+Hg1Ba2Cu1O4.1          4           0.9    35.0    94.1       70.3       92.3
+RMSE without the top 1 formula(s): 9.61 K
+RMSE without the top 3 formula(s): 9.17 K
+
+grouped baseline by composition (Cu+O compounds vs the rest):
+  Cu+O=False: rows=2039 bias=0.2 rmse=5.6
+  Cu+O=True: rows=2126 bias=-0.6 rmse=13.6
+within Cu+O compounds, by true Tc:
+  Tc <= 74: rows=1285 bias=3.6 rmse=12.7
+  Tc > 74: rows=841 bias=-7.0 rmse=14.9
+
+baseline RMSE over 10 different grouped test partitions (model seed fixed at 0):
+  10.47, 9.50, 9.79, 9.63, 10.28, 9.49, 9.00, 9.49, 9.51, 9.67
+  mean=9.68 std=0.42 min=9.00 max=10.47
+  committed split_seed=0 gave 10.47
