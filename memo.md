@@ -9,7 +9,7 @@
 - **Metric:** RMSE in K. MAE and R² are in `results/raw.csv`. R² is not used for the OOD split because its test range is narrow.
 - **Test sets:** `grouped` (primary: all rows of one formula go to the same side, 20% test), `ood` (train on Tc <= 74 K, test on Tc > 74 K), `random_iid` (baseline only).
 - **Sweeps:** training size (2 to 100%), label noise, input noise, masked features, and a size x label-noise grid. 10 seeds per condition, reported as mean +/- std over seeds.
-- **Pre-commitment:** levels, splits, seeds and metric were committed in `config.yaml` (tag `config-frozen`) before any comparison ran. Items marked *post-hoc* were added afterwards. The code that produced `results/raw.csv` is commit `979d3f8`. Final package: commit `<final hash>`.
+- **Pre-commitment:** levels, splits, seeds and metric were committed in `config.yaml` (tag `config-frozen`) before any comparison ran. Items marked *post-hoc* were added afterwards. The code that produced `results/raw.csv` is commit `979d3f8`. Final package: commit tag `final`.
 
 ## Results (test RMSE in K, mean +/- std over 10 seeds)
 
