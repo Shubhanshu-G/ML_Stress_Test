@@ -1,18 +1,19 @@
 # What drives generalization? A controlled stress test of a fixed Random Forest
 
-One public scientific dataset, one fixed model, and a sweep over how the **data** is changed: training-set size, label noise, input noise, missing features, and an out-of-distribution split. The model is never tuned or swapped, so every difference in the results comes from the data.
+One public scientific dataset, one fixed model, and a sweep over how the **data** is changed: training-set size, label noise, input noise, missing features, and an out-of-distribution split. The model is never tuned or swapped, so differences between conditions come from the data.
 
-**Headline result:** with the model held fixed, test RMSE moves from 9.4 K (random split) to 10.4 K (grouped split) to 39.2 K (out-of-distribution split). Where the test materials sit relative to the training set matters more than any of the perturbations applied to the training data.
+**Headline result:** with the model held fixed, test RMSE was 9.4 K on the random split, 10.4 K on the grouped split and 39.2 K on the out-of-distribution (OOD) split. In this setup, the choice of test set was associated with larger changes in error than any of the training-data perturbations tested.
 
 ---
 
 ## Purpose
 
-Model results are usually reported on a single random split, which hides how much of the outcome depends on the data and how the test set is chosen. This project asks a narrower question: **with the model fixed, which properties of the data decide how well it generalizes?**
+Model results are usually reported on a single random split, which hides how much of the outcome depends on the data and on how the test set is chosen. This project asks a narrower question: **with the model fixed, which properties of the data are associated with how well it generalizes?**
 
 - It is a validation experiment, not a model-building exercise. No leaderboard chasing, no hyperparameter tuning, no second model.
 - Every condition is repeated over 10 seeds, so differences can be compared against run-to-run spread.
-- The design (dataset version, splits, perturbation levels, seeds, metric) was written to `config.yaml` and committed **before** any comparison was run (git tag `config-frozen`). Analyses done afterwards are labeled *post-hoc*.
+- The design (splits, perturbation levels, seeds, model settings, metric) was written to `config.yaml` and committed in `a085154` on 2026-09-30 (18:10 IST) and has not been changed since. A one-run baseline check before that commit informed the choice of `grouped` as the primary split. 2-seed smoke runs after it (the same evening) tested the pipeline and led to dropping duplicate conditions in `src/sweep.py`; levels, seeds and model settings did not change. A first full-sweep launch on 2026-10-01 was stopped after about 110 runs and its output deleted, so that every row records the commit of the code that produced it; the first 34 rows of the rerun (first row 10:01:44) matched it. No hypotheses or pass/fail thresholds were written down before the run. Full timeline: `PROTOCOL.md`.
+- Analyses done after seeing results are labeled *post-hoc*.
 
 ---
 
@@ -32,20 +33,20 @@ Model results are usually reported on a single random split, which hides how muc
 | Split | Definition | Train / test rows |
 | --- | --- | --- |
 | `grouped` (primary) | 20% of formulas held out; all rows of a formula stay on one side | 17,098 / 4,165 |
-| `ood` | Train on Tc <= 74.0 K (80th percentile), test on Tc > 74.0 K | 17,014 / 4,249 |
+| `ood` | Train on Tc <= 74.0 K, test on Tc > 74.0 K. The boundary is the 80th percentile of Tc over the full dataset; it defines the split, and the model never sees test labels. | 17,014 / 4,249 |
 | `random_iid` (baseline only) | Random 20% of rows | 17,010 / 4,253 |
 
-`grouped` is the primary split because 37.5% of rows belong to a formula that appears more than once (15,542 distinct formulas in 21,263 rows). In a random split, copies of one formula land on both sides.
+`grouped` is the primary split because 37.5% of rows belong to a formula that appears more than once (15,542 distinct formulas in 21,263 rows). Rows of the same formula have identical features, so in a random split a test row can have an identical twin in the training set, which can make the random-split score optimistic.
 
 **Perturbations** (one factor at a time, plus a size x label-noise grid)
 
 | Factor | Levels | How it is applied |
 | --- | --- | --- |
 | Training-set size | 2, 5, 10, 25, 50, 100% | Random subsample of the training rows |
-| Label noise | 0, 0.05, 0.1, 0.2, 0.4 | Gaussian, std = level x std of training Tc. Training labels only |
-| Input noise | 0, 0.05, 0.1, 0.2, 0.4 | Gaussian, std = level x std of each feature. Training features only |
+| Label noise | 0, 0.05, 0.1, 0.2, 0.4 | Gaussian, std = level x std of the training Tc. Training labels only |
+| Input noise | 0, 0.05, 0.1, 0.2, 0.4 | Gaussian, std = level x the standard deviation of each feature (training-set std, raw units; equivalent to std = level on standardized features). Training features only |
 | Missing features | 0, 10, 25, 50% of cells | Random cells masked in train **and** test, filled with training means |
-| Interaction grid | size {10, 50, 100%} x label noise {0, 0.2, 0.4} | Combination of the above |
+| Interaction grid | size {10, 50, 100%} x label noise {0, 0.2, 0.4} | Assembled from 4 rows labeled `interaction` in `raw.csv` plus 5 cells that coincide with the baseline, size-only or label-noise-only runs. Identical fits are not repeated; `src/analyze.py` selects rows by the four setting columns. |
 
 ---
 
@@ -66,12 +67,12 @@ All numbers are test RMSE in K, mean +/- std over 10 seeds (full table: `results
 
 Random-split baseline: 9.43 +/- 0.01.
 
-1. **Test-set composition dominates.** The same model scores 9.4 K, 10.4 K and 39.2 K on the random, grouped and OOD splits. About 90% of the OOD squared error is systematic under-prediction of hot materials (seed 0: bias -28 K for Tc 74 to 100 K, -64 K above 100 K), not scatter.
-2. **Grouped split: less data, missing features and input noise cost about 5 to 6 K each at the levels tried.** Label noise costs 1.7 K at 0.4, and at most 0.13 K up to 0.1 (comparable to seed spread). The learning curve has not saturated (16.8 K at 2% of the data, 10.4 K at 100%). The levels are not commensurable across factors, so this ranks the tested levels only.
-3. **OOD split: label and input noise barely matter (at most +0.7 K).** Missing features (+7.6 K at 50%) and tiny training sets (+7.1 K at 2%) do. Going from 50% to 100% of the data gains only 0.7 K.
-4. *(post-hoc)* **The data sets an error floor.** Repeated formulas have identical features but different Tc: pooled within-formula std is 6.85 K, and `Y1Ba2Cu3O7` has 110 rows spanning 30 to 130 K. A model that sees only formula-derived features must give all of them one prediction.
-5. *(post-hoc)* **Chemistry family matters and is confounded with Tc.** Copper-oxide compounds have 13.6 K RMSE against 5.6 K for the rest (grouped), and are already at 12.7 K for Tc <= 74 K. 841 of the 842 grouped test rows above 74 K are cuprates. Hot cuprates cost 14.9 K when other hot cuprates are in training and 39.0 K when none are (OOD), on comparable but not identical test rows.
-6. *(post-hoc)* **The test partition moves the headline more than the model's randomness does.** Ten other grouped partitions give 9.00 to 10.47 K (mean 9.68, std 0.42); the std across seeds on one partition is 0.05. The committed partition is the highest of the ten, and one formula (`Tl2Ba2Cu1O6`, 45 rows) accounts for 16.7% of its squared error (RMSE 9.61 K without it). Comparisons between conditions are paired on the same test set, but absolute levels depend on the partition.
+1. **Test-set composition is associated with the largest differences.** The same model scores 9.4 K, 10.4 K and 39.2 K on the random, grouped and OOD splits. About 90% of the OOD squared error is systematic under-prediction of hot materials (seed 0: bias -28 K for Tc 74 to 100 K, -64 K above 100 K), not scatter.
+2. **Grouped split: less data, missing features and input noise were each associated with increases of 5.2 to 6.4 K at the most-damaged level tried (input noise 0.4, 50% masked, 2% data).** Label noise added 1.7 K at 0.4, and at most 0.13 K up to 0.1 (comparable to seed spread). The learning curve has not saturated (16.8 K at 2% of the data, 10.4 K at 100%). The levels are not commensurable across factors, so this ranks the tested levels only.
+3. **OOD split: label and input noise changed RMSE by at most 0.7 K.** Missing features (+7.6 K at 50%) and tiny training sets (+7.1 K at 2%) did more. Going from 50% to 100% of the data gained only 0.7 K.
+4. *(post-hoc)* **The data sets an error floor on repeated formulas.** Repeated formulas have identical features but different Tc: pooled within-formula std is 6.85 K, and `Y1Ba2Cu3O7` has 110 rows spanning 30 to 130 K. A model that sees only formula-derived features must give all of them one prediction.
+5. *(post-hoc)* **Chemistry family matters and is confounded with Tc.** Copper-oxide compounds have 13.6 K RMSE against 5.6 K for the rest (grouped), and are already at 12.7 K for Tc <= 74 K. 841 of the 842 grouped test rows above 74 K are cuprates. Hot cuprates have 14.9 K RMSE when other hot cuprates are in training and 39.0 K when none are (OOD). This suggests the OOD failure mostly reflects missing exposure to the hot range, although the two test sets are different rows.
+6. *(post-hoc)* **The choice of test partition moved the headline more than the model's randomness did.** On the committed partitions the random split scores 9.43 K and the grouped split 10.42 K (gap 0.98 K). Across ten grouped partitions (split seeds 0 to 9; seed 0 is the committed one; model seed fixed at 0), baseline RMSE ranges from 9.00 to 10.47 K (mean 9.68, std 0.42), and the committed partition is the highest of the ten and the committed gap probably overstates the typical one; the random split's own partition spread was not measured. The std across seeds on one partition is 0.05. One formula (`Tl2Ba2Cu1O6`, 45 rows) accounts for 16.7% of the committed partition's squared error (RMSE 9.61 K without it). Comparisons between conditions use the same test set, but absolute levels depend on the partition.
 
 Figures: `figures/learning_curves.png`, `robustness_curves.png`, `baseline_comparison.png`, `interaction_size_x_labelnoise.png`, `pred_vs_true.png`.
 
@@ -85,7 +86,7 @@ Full discussion and failure cases: [`memo.md`](memo.md).
 ## Project flow
 
 ```
-data/train.csv (81 features + Tc)         config.yaml  (frozen design, committed first)
+data/train.csv (81 features + Tc)         config.yaml  (design, committed before the sweep)
 data/unique_m.csv (formula, elements)            |
         |                                        |
         +------------------+---------------------+
@@ -117,7 +118,7 @@ run.py = sweep + analyze in one command.  exception/ and logger/ are used by eve
 
 | Path | Purpose |
 | --- | --- |
-| `config.yaml` | The experiment design: dataset files and hashes, splits, perturbation levels, seeds, model settings, metric. Committed before the sweep (tag `config-frozen`). Not edited afterwards. |
+| `config.yaml` | The experiment design: dataset files and hashes, splits, perturbation levels, seeds, model settings, metric. Committed in `a085154` before the sweep; not edited afterwards. |
 | `run.py` | One-command runner: sweep, then analysis. |
 | `src/data.py` | Loads the data and builds the `grouped`, `ood` and `random_iid` splits. Running `python -m src.data` prints split sizes and checks that no formula appears on both sides of the grouped split. |
 | `src/perturb.py` | The four data perturbations. Each takes a seed and is reproducible. Running it as a module self-tests the noise sizes and masking share. |
@@ -135,6 +136,13 @@ run.py = sweep + analyze in one command.  exception/ and logger/ are used by eve
 | `figures/` | Learning curves, robustness curves, baseline comparison, interaction heatmap, predicted vs true. |
 | `failure_cases/` | `worst_cases.csv` (largest errors with feature values), `error_by_tc_bin.csv` (bias and RMSE per Tc range), `feature_shift.csv` (features that differ most for the worst 5% of predictions). |
 | `memo.md` | Short write-up: findings, failure cases, limits. |
+| `PROTOCOL.md` | Design, controls, metrics, stopping rule, and a dated timeline of what was decided when. |
+| `FREEZE.json` | Freeze manifest: design and code commit SHAs, dataset hashes, model and library versions (written by `src/make_freeze.py`). |
+| `CLAIMS.md` | Each conclusion mapped to the artifact that supports it; unsupported claims listed separately. |
+| `REPRODUCE.md` | Shortest path to reproduce the results. |
+| `CLOSEOUT.md` | Status (mixed) and reason. |
+| `src/claims_check.py` | Recomputes the derived numbers quoted in the README and memo into `results/claims_numbers.csv`. |
+| `src/make_freeze.py` | Writes `FREEZE.json`. |
 | `requirements.txt` | Python dependencies. |
 | `logs/` | Created at run time, not committed. |
 
@@ -160,19 +168,20 @@ python -m src.audit_errors > results/audit_errors.txt
 **Reproducibility notes**
 
 - `results/raw.csv` is committed, so a plain `python run.py` finds all 430 runs done and only regenerates figures. Use `--fresh` to recompute.
-- A fresh recompute with the same library versions should reproduce `rmse`, `mae` and `r2` exactly (same seeds); `timestamp` and `git_hash` will differ.
+- A fresh recompute with the same library versions should reproduce `rmse`, `mae` and `r2` exactly (same seeds); `timestamp` and `git_hash` will differ. A `--quick` rerun on a later day reproduced the committed values to four decimals.
 - The `git_hash` in `results/raw.csv` is `979d3f8`, the commit containing the sweep code that produced it.
-- Tested with Python `<fill in: output of python --version>`.
+- Tested with Python 3.13.9.
 
 ---
 
 ## Limitations
 
-- **One dataset, one model.** A random forest predicts averages of training labels, so it cannot predict above the highest training Tc. The size of the OOD failure is partly a property of the model class. Other models were deliberately not tested.
+- **One dataset, one model.** A random forest predicts averages of training labels, so it cannot predict above the highest training Tc. Whether another model would do better was not tested (by design).
 - **Fixed partition.** Error bars cover model, noise and subsampling randomness, not the choice of test partition (finding 6).
 - **Perturbation levels are not commensurable across factors.** Input noise is applied to training data only, masking to train and test, and label noise is not clipped (training labels can go below 0).
 - **Failure-case tables and findings 4 to 6 are post-hoc**, and the failure cases come from single runs (seed 0).
 - **Tc and chemistry are confounded** in this dataset: almost every hot material is a copper-oxide compound.
+- Conclusions are specific to this dataset, this feature representation, this Random Forest baseline, these split definitions and these perturbation levels.
 
 ---
 
