@@ -75,13 +75,4 @@ if __name__ == "__main__":
     c = add_label_noise(ytr, 0.2, seed=2)
     print("same seed identical:", np.allclose(a, b), "| different seed differs:", not np.allclose(a, c))
     print("original labels untouched:", y_before.equals(ytr))
-    logging.info(
-    f"subsample 0.1: {len(Xs)} of {len(Xtr)}\n"
-    f"label noise std ratio (expect ~0.4): {round((yn - ytr).std() / ytr.std(), 3)}\n"
-    f"input noise std ratio (expect ~0.2): {round(((Xn - Xtr).std() / Xtr.std()).mean(), 3)}\n"
-    f"masked share train (expect ~0.25): {round((Mtr.values != Xtr.values).mean(), 3)}\n"
-    f"masked share test  (expect ~0.25): {round((Mte.values != Xte.values).mean(), 3)}\n"
-    f"NaNs after masking (expect 0): {int(Mtr.isna().sum().sum() + Mte.isna().sum().sum())}\n"
-    f"same seed identical: {np.allclose(a, b)} | different seed differs: {not np.allclose(a, c)}\n"
-    f"original labels untouched: {y_before.equals(ytr)}"
-    )
+    
