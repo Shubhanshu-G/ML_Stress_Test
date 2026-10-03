@@ -1,0 +1,147 @@
+{
+  "note": "Freeze manifest generated after the results existed, from git history and the committed files. The authoritative pre-result record is config.yaml at design_commit.",
+  "design_commit": {
+    "sha": "a085154e15f7c96c0d137dc4a2d1dcac6707b232",
+    "time": "2026-09-30T18:10:42+05:30",
+    "message": "config file",
+    "contains": "config.yaml (splits, levels, seeds, model settings, metric)"
+  },
+  "code_commit": {
+    "sha": "979d3f8674604edc2891d07eec803bb5b64dbfe1",
+    "time": "2026-10-01T10:00:43+05:30",
+    "message": "add sweep and project files",
+    "contains": "sweep code that produced results/raw.csv"
+  },
+  "config_unchanged_since_design_commit": true,
+  "config_sha256_now": "cc35c4938c609375b2438ec985bcf3195269e0dc0ab88fd12502631a454bfe5d",
+  "dataset": {
+    "name": "UCI Superconductivty Data",
+    "uci_id": 464,
+    "download_date": "2026-09-30",
+    "train_csv": {
+      "path": "data/train.csv",
+      "sha256_in_config": "4dfb6e3a1f6ffd969e5a5e42f093c4800d1e2a6c8b1e309f8fcd9f23d86952f3",
+      "sha256_now": "4dfb6e3a1f6ffd969e5a5e42f093c4800d1e2a6c8b1e309f8fcd9f23d86952f3",
+      "match": true
+    },
+    "unique_m_csv": {
+      "path": "data/unique_m.csv",
+      "sha256_in_config": "b68ae6b55ea8581eff8b1ffba073a899db7e2d2f7f3b781bb0802f643f51e5f7",
+      "sha256_now": "b68ae6b55ea8581eff8b1ffba073a899db7e2d2f7f3b781bb0802f643f51e5f7",
+      "match": true
+    },
+    "target": "critical_temp"
+  },
+  "model": {
+    "type": "RandomForestRegressor",
+    "params": {
+      "n_estimators": 200,
+      "n_jobs": -1
+    },
+    "random_state": "per-run seed",
+    "python": "3.13.9",
+    "libraries": {
+      "numpy": "2.3.5",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.9.0",
+      "matplotlib": "3.10.6",
+      "pyyaml": "6.0.3"
+    }
+  },
+  "design": {
+    "primary_split": "grouped",
+    "sweep_splits": [
+      "grouped",
+      "ood"
+    ],
+    "baseline_only_splits": [
+      "random_iid"
+    ],
+    "split": {
+      "random_iid": {
+        "test_size": 0.2,
+        "split_seed": 0
+      },
+      "grouped": {
+        "test_size": 0.2,
+        "split_seed": 0
+      },
+      "ood": {
+        "quantile": 0.8
+      }
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "primary_metric": "rmse",
+    "secondary_metrics": [
+      "mae",
+      "r2"
+    ],
+    "sweeps": {
+      "train_fraction": [
+        0.02,
+        0.05,
+        0.1,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "label_noise": [
+        0,
+        0.05,
+        0.1,
+        0.2,
+        0.4
+      ],
+      "input_noise": [
+        0,
+        0.05,
+        0.1,
+        0.2,
+        0.4
+      ],
+      "missing_frac": [
+        0,
+        0.1,
+        0.25,
+        0.5
+      ],
+      "interaction": {
+        "train_fraction": [
+          0.1,
+          0.5,
+          1.0
+        ],
+        "label_noise": [
+          0,
+          0.2,
+          0.4
+        ]
+      }
+    }
+  },
+  "results": {
+    "raw_csv": "results/raw.csv",
+    "sha256": "d2f6a88f914bf463ac7089aa826485416673729802402e6817aacaee7eb4737b",
+    "rows": 430,
+    "planned_runs": 430,
+    "complete": true
+  },
+  "analysis_scripts": [
+    "src/analyze.py",
+    "src/audit.py",
+    "src/audit_errors.py",
+    "src/claims_check.py"
+  ],
+  "analysis_scripts_note": "Committed after results/raw.csv existed; run on the final raw.csv. Audits and claims_check are post-hoc."
+}
