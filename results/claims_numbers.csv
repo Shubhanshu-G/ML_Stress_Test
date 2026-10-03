@@ -1,0 +1,37 @@
+claim,value,note
+"baseline RMSE, random_iid",9.43,"seed std 0.01, n_seeds 10"
+"always-predict-mean RMSE, random_iid",34.1,
+"baseline RMSE, grouped",10.42,"seed std 0.05, n_seeds 10"
+"always-predict-mean RMSE, grouped",34.1,
+"baseline RMSE, ood",39.17,"seed std 0.09, n_seeds 10"
+"always-predict-mean RMSE, ood",72.4,
+"committed gap, grouped minus random",0.98,committed partitions only
+grouped: training size 50%,11.11,"change vs baseline +0.70 K, seed std 0.31"
+grouped: training size 10%,13.43,"change vs baseline +3.02 K, seed std 0.32"
+grouped: training size 2%,16.77,"change vs baseline +6.35 K, seed std 0.60"
+grouped: label noise 0.1,10.54,"change vs baseline +0.13 K, seed std 0.09"
+grouped: label noise 0.4,12.11,"change vs baseline +1.70 K, seed std 0.34"
+grouped: input noise 0.2,14.04,"change vs baseline +3.62 K, seed std 0.11"
+grouped: input noise 0.4,15.61,"change vs baseline +5.20 K, seed std 0.12"
+grouped: 10% masked,11.72,"change vs baseline +1.31 K, seed std 0.14"
+grouped: 50% masked,15.71,"change vs baseline +5.29 K, seed std 0.17"
+ood: training size 50%,39.9,"change vs baseline +0.74 K, seed std 0.39"
+ood: training size 10%,42.17,"change vs baseline +3.01 K, seed std 1.37"
+ood: training size 2%,46.22,"change vs baseline +7.06 K, seed std 1.19"
+ood: label noise 0.1,39.18,"change vs baseline +0.01 K, seed std 0.15"
+ood: label noise 0.4,39.15,"change vs baseline -0.01 K, seed std 0.23"
+ood: input noise 0.2,39.85,"change vs baseline +0.69 K, seed std 0.41"
+ood: input noise 0.4,39.75,"change vs baseline +0.58 K, seed std 0.36"
+ood: 10% masked,41.61,"change vs baseline +2.44 K, seed std 0.09"
+ood: 50% masked,46.74,"change vs baseline +7.58 K, seed std 0.17"
+ood: gain from 50% to 100% of the data,0.74,
+ood baseline: share of squared error that is per-range bias,89.6%,seed 0
+"ood baseline bias, Tc 74-100",-28.0,"K, seed 0"
+"ood baseline bias, Tc >100",-63.8,"K, seed 0"
+"grouped baseline bias, Tc <= 10",1.9,"K, seed 0"
+"grouped baseline bias, Tc > 100",-9.6,"K, seed 0"
+grouped test rows with Tc > 74,842,seed 0 test set
+"grouped bias, Tc > 100, 2% data",-33.4,"K, seed 0"
+"grouped bias, Tc > 100, 50% masked",-29.5,"K, seed 0"
+"grouped bias, Tc > 100, input noise 0.4",-13.2,"K, seed 0"
+"grouped bias, Tc > 100, label noise 0.4",-10.0,"K, seed 0"
