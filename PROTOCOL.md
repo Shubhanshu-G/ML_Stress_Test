@@ -1,6 +1,6 @@
 # PROTOCOL
 
-**Status of this document.** Written 2026-10-03, after the results existed. It describes the protocol recorded in `config.yaml` (commit `a085154`, 2026-09-30 18:10 IST; see `FREEZE.json`). It adds no design choices. Departures and disclosures are listed at the end.
+**Status of this document.** Written 2026-10-03, after the results existed. Design rationale section added 2026-10-04. It describes the protocol recorded in `config.yaml` (commit `a085154`, 2026-09-30 18:10 IST; see `FREEZE.json`). It adds no design choices. Departures and disclosures are listed at the end.
 
 ## Question
 
